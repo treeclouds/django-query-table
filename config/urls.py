@@ -23,7 +23,7 @@ urlpatterns = [
     path("users/", include("django_query_table.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
-    # ...
+    path("queryapp/", include("django_query_table.queryapp.urls")),
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]

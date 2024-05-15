@@ -199,5 +199,8 @@ sentry_sdk.init(
 SPECTACULAR_SETTINGS["SERVERS"] = [
     {"url": "https://example.com", "description": "Production server"},
 ]
-# Your stuff...
+
+# django_query_table settings
 # ------------------------------------------------------------------------------
+CONN_MAX_AGE = env("CONN_MAX_AGE", default=60)
+CONN_HEALTH_CHECKS = env("CONN_HEALTH_CHECKS", default=True)

@@ -63,3 +63,9 @@ INSTALLED_APPS += ["django_extensions"]
 CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+
+# django_query_table settings
+# ------------------------------------------------------------------------------
+CONN_MAX_AGE = env("CONN_MAX_AGE", default=60)
+CONN_HEALTH_CHECKS = env("CONN_HEALTH_CHECKS", default=True)
