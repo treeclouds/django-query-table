@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect
 from django.db import connections, OperationalError
 from .models import SQLQuery
 from .forms import SQLQueryForm, DatabaseForm
+from .tables import SQLResultsTable
 from django.core.paginator import Paginator
 import csv
 from django.http import HttpResponse
 from django.conf import settings
+import django_tables2 as tables
 
 def index(request):
     if request.method == 'POST':
@@ -57,14 +59,14 @@ def execute_query(request):
         if filter_value:
             results = [row for row in results if filter_value in str(row)]
 
-        paginator = Paginator(results, 10)  # Show 10 rows per page.
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        data = [dict(zip(columns, row)) for row in results]
+        table = SQLResultsTable(data, extra_columns=[(col, tables.Column()) for col in columns])
+        print(data)
+        tables.RequestConfig(request, paginate={'per_page': 10}).configure(table)
 
         return render(request, 'queryapp/results.html', {
             'query': query,
-            'columns': columns,
-            'page_obj': page_obj,
+            'table': table,
         })
     except OperationalError as e:
         return render(request, 'queryapp/error.html', {'error': str(e)})
