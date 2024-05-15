@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.db import connections, OperationalError
 from .models import SQLQuery
-from .forms import SQLQueryForm, DatabaseForm
+from .forms import SQLQueryForm, DatabaseForm, create_filter_form
 from .tables import SQLResultsTable
-from django.core.paginator import Paginator
 import csv
 from django.http import HttpResponse
 from django.conf import settings
@@ -55,18 +54,25 @@ def execute_query(request):
             columns = [col[0] for col in cursor.description]
             results = cursor.fetchall()
 
-        filter_value = request.GET.get('filter')
-        if filter_value:
-            results = [row for row in results if filter_value in str(row)]
-
         data = [dict(zip(columns, row)) for row in results]
+
+        FilterForm = create_filter_form(columns)
+        if request.GET:
+            filter_form = FilterForm(request.GET)
+            if filter_form.is_valid():
+                for field, value in filter_form.cleaned_data.items():
+                    if value:
+                        data = [row for row in data if value in str(row.get(field))]
+        else:
+            filter_form = FilterForm()
+
         table = SQLResultsTable(data, extra_columns=[(col, tables.Column()) for col in columns])
-        print(data)
         tables.RequestConfig(request, paginate={'per_page': 10}).configure(table)
 
         return render(request, 'queryapp/results.html', {
             'query': query,
             'table': table,
+            'filter_form': filter_form,
         })
     except OperationalError as e:
         return render(request, 'queryapp/error.html', {'error': str(e)})

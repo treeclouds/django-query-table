@@ -19,3 +19,11 @@ class DatabaseForm(forms.Form):
     password = forms.CharField(max_length=100, required=False, help_text="Database password (if applicable)")
     host = forms.CharField(max_length=100, required=False, help_text="Database host (if applicable)")
     port = forms.CharField(max_length=5, required=False, help_text="Database port (if applicable)")
+
+
+def create_filter_form(column_names):
+    fields = {}
+    for column in column_names:
+        fields[column] = forms.CharField(required=False, label=column)
+
+    return type('DynamicFilterForm', (forms.BaseForm,), {'base_fields': fields})
